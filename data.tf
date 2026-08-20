@@ -1,3 +1,3 @@
-data "aws_availability_zones" "example" {
+data "aws_availability_zones" "available" {
   all_availability_zones = true
 }
