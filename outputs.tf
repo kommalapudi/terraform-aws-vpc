@@ -1,3 +1,3 @@
 output "azs_info" {
-    value = data.aws_availability_zones.example
+    value = data.aws_availability_zones
 }
