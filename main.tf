@@ -5,7 +5,6 @@ resource "aws_vpc" "main" {
 
   tags = local.vpc_final_tags
 }
-      var.nat_gateway_tags
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id # VPC association
 
@@ -138,7 +137,7 @@ resource "aws_nat_gateway" "main" {
          {
             Name = "${var.project}-${var.environment}"
          },
-         var.nat_gateway.tags
+        var.nat_gateway_tags
         
     )
 
