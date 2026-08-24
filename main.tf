@@ -109,4 +109,55 @@ resource "aws_route_table" "database" {
     )
 }
 
+resource "aws_route" "public" {
+  route_table_id            = aws_route_table.public.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.main.id
+}
+
+resource "aws_eip" "nat" {
+  domain   = "vpc"
+
+  tags = merge(
+         local.common_tags,
+         # roboshop-dev-nat
+         {
+            Name = "${var.project}-${var.environment}-nat"
+         },
+         var.eip.tags
+        
+    )
+}
+
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id # we are creating this in us-east-1a AZ
+
+  tags = merge(
+         local.common_tags,
+         {
+            Name = "${var.project}-${var.environment}"
+         },
+         var.nat_gateway.tags
+        
+    )
+
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.main]
+}
+
+resource "aws_route" "private" {
+  route_table_id            = aws_route_table.private.id
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id = aws_internet_gateway.main.id
+}
+
+resource "aws_route" "database" {
+  route_table_id            = aws_route_table.database.id
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id = aws_internet_gateway.main.id
+}
+
+
 
